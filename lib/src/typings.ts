@@ -16,6 +16,13 @@ export interface Vec4 {
     w: number;
 }
 
+export interface ColorfulObject {
+    red: number;
+    green: number;
+    blue: number;
+    alpha: number;
+}
+
 export interface Direction {
     angle: number;
     cos: number;
