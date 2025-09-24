@@ -4,6 +4,8 @@
  * 
  * An light-weight, modular, advanced graphics 
  * library made for shining on the web.
+ * 
+ * For more info, see https://www.fluex.org/solutions/fluex-gl
  */
 
 export { exports as Utilities } from "./utilities/exports";
