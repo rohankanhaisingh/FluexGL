@@ -8,4 +8,4 @@
  * For more info, see https://www.fluex.org/solutions/fluex-gl
  */
 
-export { exports as Utilities } from "./utilities/exports";
+export * as Utilities from "./utilities/exports";

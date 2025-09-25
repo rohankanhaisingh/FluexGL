@@ -1,21 +1,48 @@
-import * as Calculators from "./math/calculators";
-import * as Randomizer from "./math/randomizer";
+export {
+    CalculateAverageArrayValue,
+    CalculateDirection,
+    CalculateIntersection,
+    CalculateVectorAngle,
+    CalculateVectorDistance
+} from "./math/calculators";
 
-import { Vector2 } from "./math/classes/vectors/Vector2";
-import { Vector3 }  from "./math/classes/vectors/Vector3";
-import { Vector4 } from "./math/classes/vectors/Vector4";
+export {
+    RandomBoolean,
+    RandomFloatInRange,
+    RandomIntegerInRange,
+    RandomItem,
+    RandomNormal,
+    RandomUnitVector2D,
+    RandomUnitVector3D
+} from "./math/randomizer";
 
-import * as Constants from "./constants";
+export {
+    ConvertHexToByteArray,
+    ConvertByteArrayToHex,
+    RGBToHSL,
+    HexToRGB,
+    RGBToHex,
+    HSLToRGB,
+} from "./color/converters";
 
-export const exports = {
-  Math: {
-    ...Calculators,
-    ...Randomizer,
-    Vector2,
-    Vector3,
-    Vector4,
-  },
-  Constants: {
-    ...Constants
-  }
-} as const;
+export {
+    PixelsPerMeter,
+    DegreesToRadians,
+    RadiansToDegrees,
+    Epsilon,
+    InfinityValue,
+    PI,
+    TwoPI,
+    HalfPI,
+    QuarterPI,MinInt32,
+    MaxInt32,
+    MinSafeInt,
+    MaxSafeInt,
+    DefaultGravity,
+    DefaultAirDensity
+} from "./constants";
+
+export { Vector2 } from "./math/classes/vectors/Vector2";
+export { Vector3 } from "./math/classes/vectors/Vector3";
+export { Vector4 } from "./math/classes/vectors/Vector4";
+export { Color } from "./color/classes/Color";
