@@ -31,3 +31,22 @@ export interface Direction {
     complete: () => Vec2;
     multiply: (len: number) => Vec2;
 }
+
+export interface ThreadOnLoopEvent {
+    now: number;
+    deltaTime: number;
+    frameRate: number;
+    lastRegisteredTimestamp: number;
+    simulationUpdateRate: number;
+}
+
+export interface ThreadEventMap {
+    "update": (event: ThreadOnLoopEvent) => void;
+    "start": () => void;
+    "stop":  () => void;
+    "idle": () => void;
+}
+
+export type ThreadEvents = {
+    [K in keyof ThreadEventMap]: Array<ThreadEventMap[K]>;
+}
