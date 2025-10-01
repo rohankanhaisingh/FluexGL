@@ -42,6 +42,10 @@ export {
     DefaultAirDensity
 } from "./constants";
 
+export {
+    Debug
+} from "./debugging/console";
+
 export { Vector2 } from "./math/classes/vectors/Vector2";
 export { Vector3 } from "./math/classes/vectors/Vector3";
 export { Vector4 } from "./math/classes/vectors/Vector4";
