@@ -1,5 +1,6 @@
+import { ErrorCodes } from "../../codes";
 import { Direction, Vec2 } from "../../typings";
-import { Vector2 } from "../exports";
+import { Debug, Vector2 } from "../exports";
 
 /**
  * Calculates the arithmetic mean of the given numbers.
@@ -10,12 +11,29 @@ import { Vector2 } from "../exports";
  * @returns Average value.
  * @throws If no finite numbers are provided.
  */
-export function CalculateAverageArrayValue(input: number[]): number {
+export function CalculateAverageArrayValue(input: number[]): number | null {
+
+    if(!input) {
+
+        Debug.Error("CalculateAverageArrayValue: invalid input (null or undefined).", [
+            "Input must be a non-null array of numbers.",
+            `Received: ${typeof input}`
+        ], ErrorCodes.NUMBER_NO_VALID_INPUT_PROVIDED);
+
+        return null;
+    }
 
     const valid = input.filter(Number.isFinite);
 
-    if (valid.length === 0) 
-        throw new Error("CalculateAverageArrayValue: no finite numbers provided.");
+    if (valid.length === 0) {
+
+        Debug.Error("CalculateAverageArrayValue: no valid input provided.", [
+            "Input array must contain at least one finite number.",
+            `Received: [${input.join(", ")}]`
+        ], ErrorCodes.NUMBER_NO_VALID_INPUT_PROVIDED);
+
+        return null;
+    }
 
     const sum = valid.reduce((acc, v) => acc + v, 0);
 

@@ -2,6 +2,7 @@ import { v4 } from "uuid";
 
 import { Debug } from "../../utilities/debugging/console";
 import { ThreadEventMap, ThreadEvents } from "../../typings";
+import { ErrorCodes, WarningCodes } from "../../codes";
 
 export class Thread {
 
@@ -96,10 +97,12 @@ export class Thread {
      *
      * @returns this
      */
-    public StartLoop(): Thread {
+    public Start(): Thread {
 
         if (this.isActive) {
-            Debug.Warn("Could not start thread loop because it is already active.");
+            Debug.Warn("Could not start thread loop because it is already active.", [
+                "Call method Stop() before starting again.",
+            ], WarningCodes.THREAD_ALREADY_ACTIVE);
             return this;
         }
 
@@ -120,10 +123,12 @@ export class Thread {
      *
      * @returns this
      */
-    public StopLoop(): Thread {
+    public Stop(): Thread {
 
         if (!this.isActive) {
-            Debug.Warn("Could not stop the thread loop because it is already inactive.");
+            Debug.Warn("Could not stop the thread loop because it is already inactive.", [
+                "Call method Start() before stopping again.",
+            ], WarningCodes.THREAD_ALREADY_INACTIVE);
             return this;
         }
 
@@ -147,10 +152,16 @@ export class Thread {
      * @returns this
      */
     public SetSimulationUpdateRate(rate: number): Thread {
+
         if (!Number.isFinite(rate) || rate <= 0) {
-            Debug.Warn(`SetSimulationUpdateRate: invalid rate "${rate}".`);
+
+            Debug.Error(`SetSimulationUpdateRate: invalid rate "${rate}".`, [
+                "Rate must be a positive number greater than zero.",
+                `Received: ${rate}`
+            ], ErrorCodes.THREAD_INVALID_SIMULATION_UPDATE_RATE);
             return this;
         }
+
         this.simulationUpdateRate = rate;
         return this;
     }
@@ -162,10 +173,16 @@ export class Thread {
      * @returns this
      */
     public SetMaxDeltaMs(ms: number): Thread {
+
         if (!Number.isFinite(ms) || ms <= 0) {
-            Debug.Warn(`SetMaxDeltaMs: invalid value "${ms}".`);
+            
+            Debug.Error(`SetMaxDeltaMs: invalid value "${ms}".`, [
+                "Value must be a positive number greater than zero.",
+                `Received: ${ms}`
+            ], ErrorCodes.THREAD_INVALID_DELTA_TIME);
             return this;
         }
+        
         this.maxDeltaMs = ms;
         return this;
     }

@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "rootDir": "./lib/src",
+    "outDir": "./lib/dist",
+    "module": "commonjs",
+    "target": "es2022",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "paths": {
+    "@fluex-gl/test*": ["lib/src/*"]
+  },
+  "include": [
+    "lib/src/**/*"
+  ],
+  "exclude": [
+    "lib/test",
+    "node_modules"
+  ]
+}

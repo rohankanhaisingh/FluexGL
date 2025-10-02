@@ -1,3 +1,23 @@
+export interface FluexGlDebuggerOptions {
+    showInfo: boolean;
+    showWarnings: boolean;
+    showErrors: boolean;
+    breakOnError: boolean;
+}
+
+export interface FluexGLOptions {
+    debugger: FluexGlDebuggerOptions;
+}
+
+export interface FluexGlDescriptor {
+    name: string;
+    author: string;
+    version: string;
+    license: string;
+    repository: string;
+    options: FluexGLOptions;
+}
+
 export interface Vec2 {
     x: number;
     y: number;
