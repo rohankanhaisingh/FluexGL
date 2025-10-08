@@ -70,3 +70,20 @@ export interface ThreadEventMap {
 export type ThreadEvents = {
     [K in keyof ThreadEventMap]: Array<ThreadEventMap[K]>;
 }
+
+export interface WebGPURendererOptions {
+    canvasWidth: number;
+    canvasHeight: number;
+    antialiasing: boolean;
+    powerPreference: GPUPowerPreference;
+    alphaMode: GPUCanvasAlphaMode;
+    format: GPUTextureFormat;
+    usage: GPUTextureUsageFlags;
+    requiredFeatures: GPUFeatureName[];
+    requiredLimits: Record<string, number>;
+    colorSpace: PredefinedColorSpace;
+    msaaSampleCount: number;
+    depthFormat: GPUTextureFormat;
+    clearColor: GPUColor;
+    devicePixelRatio: number;
+}

@@ -63,6 +63,10 @@ export {
 } from "./utilities/exports";
 
 export {
+    WebGPURenderer
+} from "./renderer/exports";
+
+export {
     Scene, Thread
 } from "./others/exports";
 

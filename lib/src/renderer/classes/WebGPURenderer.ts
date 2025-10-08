@@ -1,0 +1,163 @@
+import { v4 } from "uuid";
+
+import { ErrorCodes } from "../../codes";
+import { WebGPURendererOptions } from "../../typings";
+import { Debug } from "../../utilities/exports";
+
+export class WebGPURenderer {
+
+    private width: number = 0;
+    private height: number = 0;
+    private displayPixelRatio: number = window.devicePixelRatio || 1;
+
+    declare private msaaTexture: GPUTexture;
+    declare private depthTexture: GPUTexture;
+    declare private msaaTextureView: GPUTextureView;
+    declare private depthTextureView: GPUTextureView;
+
+    public id: string = v4();
+    
+    declare public gpuDevice: GPUDevice;
+    declare public gpuAdapter: GPUAdapter;
+    
+    declare public context: GPUCanvasContext;
+    declare public format: GPUTextureFormat;
+    declare public queue: GPUQueue;
+
+    declare public canvas: HTMLCanvasElement;
+
+    constructor(public options: Partial<WebGPURendererOptions> = {}) {
+
+        this.canvas = document.createElement("canvas");
+
+        this.canvas.width = options.canvasWidth ?? 800;
+        this.canvas.height = options.canvasHeight ?? 600;
+
+        this.canvas.setAttribute("fluexgl-renderer-type", "WebGPURenderer");
+        this.canvas.setAttribute("fluexgl-renderer-id", this.id);
+    }
+
+    public SetCanvasSizeRelativeToWindow(margin: number = 0, updateOnResize: boolean = false): void {
+     
+        if(!this.canvas) return Debug.Error("WebGPURenderer: Cannot set canvas size because canvas is not created.", [
+            "Make sure that the WebGPURenderer instance is created properly."
+        ], ErrorCodes.WGPUR_CANVAS_NOT_CREATED);
+
+        const canvas = this.canvas;
+
+        canvas.width = window.innerWidth - margin;
+        canvas.height = window.innerHeight - margin;
+
+        updateOnResize && window.addEventListener("resize", function() {
+            
+            canvas.width = window.innerWidth - margin;
+            canvas.height = window.innerHeight - margin;
+        });
+    }
+
+    public AppendCanvasToElement(element: HTMLElement): void {
+        
+        if(!this.canvas) return Debug.Error("WebGPURenderer: Cannot append canvas to element because canvas is not created.", [
+            "Make sure that the WebGPURenderer instance is created properly."
+        ], ErrorCodes.WGPUR_CANVAS_NOT_CREATED);
+
+        element.appendChild(this.canvas);
+    }
+
+    public SetDisplayPixelRatio(ratio: number = 1) {
+
+        if(ratio >= 2) Debug.Warn("WebGPURenderer: Setting display pixel ratio to 2 or higher may cause performance issues on some devices.", [
+            "Make sure that the device running FluexGL can handle high pixel ratios.",
+            "Consider using a ratio between 1 and 2 for better performance."
+        ]);
+
+        if(ratio >= 10) Debug.Warn("Bruh this gpu gonna die bro 🥀", [
+            "Setting display pixel ratio to 10 or higher is not recommended.",
+            "This may cause severe performance issues or even crash the application.",
+        ]);
+
+        if(ratio <= 0) {
+
+            Debug.Error("WebGPURenderer: Display pixel ratio must be greater than 0. Display pixel ratio will be set to 1.", [
+                "Provided value: " + ratio
+            ], ErrorCodes.WGPUR_INVALID_DPR_VALUE);
+
+            this.displayPixelRatio = window.devicePixelRatio || 1;
+
+            return null;
+        }
+
+        this.displayPixelRatio = Math.max(1, Math.min(ratio || 1, 100));
+        this.applySizeChanges();
+
+        return this;
+    }
+
+    public SetSize(width: number = 0, height: number = 0) {
+
+        this.canvas.width = Math.max(1, Math.floor(width * this.displayPixelRatio));
+        this.canvas.height = Math.max(1, Math.floor(height * this.displayPixelRatio));
+
+        this.width = this.canvas.width;
+        this.height = this.canvas.height;
+        
+    }
+
+    public async Initialize(): Promise<WebGPURenderer | null> {
+
+        if(!navigator.gpu) {
+
+            Debug.Error("WebGPURenderer: WebGPU is not supported in this browser.", [
+                "Make sure that you are using a compatible browser.",
+                "Check https://caniuse.com/webgpu for more information."
+            ], ErrorCodes.WGPUR_API_NOT_SUPPORTED);
+            return null;
+        }
+
+        Debug.Log("WebGPURenderer: Attempting to request GPU adapter.", [
+            "Options: " + JSON.stringify(this.options)
+        ]);
+
+        const gpuAdapter: GPUAdapter | null = await navigator.gpu.requestAdapter({
+            powerPreference: this.options.powerPreference ?? "high-performance"
+        });
+
+        if(!gpuAdapter) {
+
+            Debug.Error("WebGPURenderer: Unable to get GPU Adapter.", [
+                "Make sure that your system has a compatible GPU and that WebGPU is enabled in your browser."
+            ], ErrorCodes.WGPUR_UNABLE_TO_GET_ADAPTER);
+            return null;
+        }
+
+        Debug.Log("WebGPURenderer: Successfully obtained GPU adapter.", [
+            "Architecture: " + (gpuAdapter.info.architecture ?? "Unknown"),
+            "Device: " + (gpuAdapter.info.device ?? "Unknown"),
+            "Vendor: " + (gpuAdapter.info.vendor ?? "Unknown"),
+            "Renderer ID: " + this.id
+        ]);
+
+        this.gpuAdapter = gpuAdapter;
+
+        const device: GPUDevice = await this.gpuAdapter.requestDevice({
+            requiredFeatures: this.options.requiredFeatures ?? [],
+            requiredLimits: this.options.requiredLimits ?? {},
+            label: "FluexGL-WebGPURenderer-Device-" + this.id
+        });
+
+        this.gpuDevice = device;
+
+        this.context = this.canvas.getContext("webgpu") as unknown as GPUCanvasContext;
+        this.format = this.options.format ?? navigator.gpu.getPreferredCanvasFormat();
+
+        return this;
+    }
+
+    private applySizeChanges() {
+
+        const width = this.options.canvasWidth ?? this.canvas.clientWidth ?? 800;
+        const height = this.options.canvasHeight ?? this.canvas.clientHeight ?? 600;
+
+        this.SetSize(width, height);
+    }
+}
