@@ -43,15 +43,13 @@ export class WebGPURenderer {
             "Make sure that the WebGPURenderer instance is created properly."
         ], ErrorCodes.WGPUR_CANVAS_NOT_CREATED);
 
-        const canvas = this.canvas;
+        const self = this;
 
-        canvas.width = window.innerWidth - margin;
-        canvas.height = window.innerHeight - margin;
+        this.SetSize(window.innerWidth - margin, window.innerHeight - margin);
 
         updateOnResize && window.addEventListener("resize", function () {
 
-            canvas.width = window.innerWidth - margin;
-            canvas.height = window.innerHeight - margin;
+            self.SetSize(window.innerWidth - margin, window.innerHeight - margin);
         });
     }
 
