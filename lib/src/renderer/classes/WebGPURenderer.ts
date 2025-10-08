@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 
-import { ErrorCodes } from "../../codes";
+import { ErrorCodes, WarningCodes } from "../../codes";
 import { WebGPURendererOptions } from "../../typings";
 import { Debug } from "../../utilities/exports";
 
@@ -69,12 +69,12 @@ export class WebGPURenderer {
         if(ratio >= 2) Debug.Warn("WebGPURenderer: Setting display pixel ratio to 2 or higher may cause performance issues on some devices.", [
             "Make sure that the device running FluexGL can handle high pixel ratios.",
             "Consider using a ratio between 1 and 2 for better performance."
-        ]);
+        ], WarningCodes.WGPUR_HIGH_DPR_VALUE);
 
         if(ratio >= 10) Debug.Warn("Bruh this gpu gonna die bro 🥀", [
             "Setting display pixel ratio to 10 or higher is not recommended.",
             "This may cause severe performance issues or even crash the application.",
-        ]);
+        ], WarningCodes.WGPUR_HIGH_DPR_VALUE);
 
         if(ratio <= 0) {
 
