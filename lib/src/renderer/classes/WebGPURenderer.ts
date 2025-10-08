@@ -145,6 +145,18 @@ export class WebGPURenderer {
             label: "FluexGL-WebGPURenderer-Device-" + this.id
         });
 
+        device.addEventListener("uncapturederror", function(event: GPUUncapturedErrorEvent) {
+            return Debug.Error("WebGPURenderer: An uncaught GPU error occurred.", [
+                "Error: " + event.error.message
+            ], ErrorCodes.WGPUR_DEVICE_UNCAPTURED_ERROR);
+        });
+
+        device.lost.then(function(info: GPUDeviceLostInfo) {
+            return Debug.Error("WebGPURenderer: The GPU device was lost.", [
+                "Reason: " + info.message
+            ], ErrorCodes.WGPUR_DEVICE_LOST_ERROR);
+        });
+
         this.gpuDevice = device;
 
         this.context = this.canvas.getContext("webgpu") as unknown as GPUCanvasContext;
