@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "@types/uuid": "^10.0.0",
-    "uuid": "^13.0.0"
+    "gl-matrix": "^3.4.4",
+    "uuid": "^13.0.0",
+    "wgsl_reflect": "^1.2.3"
   },
   "devDependencies": {
     "@webgpu/types": "^0.1.65"

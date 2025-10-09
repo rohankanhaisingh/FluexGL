@@ -1,8 +1,11 @@
 import { v4 } from "uuid";
 
 import { ErrorCodes, WarningCodes } from "../../codes";
-import { WebGPURendererOptions } from "../../typings";
+import { WebGPURendererFrameInfo, WebGPURendererOptions } from "../../typings";
 import { Debug } from "../../utilities/exports";
+import { WebGPURendererScene } from "../../others/exports";
+import { Camera } from "../../camera/exports";
+import { Renderable } from "./Renderable";
 
 export class WebGPURenderer {
 
@@ -16,6 +19,7 @@ export class WebGPURenderer {
     declare private depthTextureView: GPUTextureView;
 
     public id: string = v4();
+    public hasInitialized: boolean = false;
 
     declare public gpuDevice: GPUDevice;
     declare public gpuAdapter: GPUAdapter;
@@ -36,6 +40,8 @@ export class WebGPURenderer {
         this.canvas.setAttribute("fluexgl-renderer-type", "WebGPURenderer");
         this.canvas.setAttribute("fluexgl-renderer-id", this.id);
     }
+
+    // Public methods.
 
     public SetCanvasSizeRelativeToWindow(margin: number = 0, updateOnResize: boolean = false): void {
 
@@ -163,10 +169,94 @@ export class WebGPURenderer {
         this.context = this.canvas.getContext("webgpu") as unknown as GPUCanvasContext;
         this.format = this.options.format ?? navigator.gpu.getPreferredCanvasFormat();
 
+        this.configureContext();
         this.SetDevicePixelRatio(this.options.devicePixelRatio ?? (window.devicePixelRatio || 1));
+        this.applySizeChanges();
+
+        this.hasInitialized = true;
 
         return this;
     }
+
+    public BeginFrame(): WebGPURendererFrameInfo {
+        const clear = this.options.clearColor ?? { r: 0, g: 0, b: 0, a: 1 };
+
+        const swapView = this.context.getCurrentTexture().createView();
+        
+        const encoder = this.gpuDevice.createCommandEncoder({
+            label: "FluexGL-WebGPURenderer-CommandEncoder-" + this.id
+        });
+
+        const sampleCount = this.options.msaaSampleCount ?? 1;
+
+        const colorAttachment: GPURenderPassColorAttachment = sampleCount > 1
+            ? {
+                view: this.msaaTextureView,
+                resolveTarget: swapView,
+                clearValue: clear,
+                loadOp: "clear",
+                storeOp: "store",
+            }
+            : {
+                view: swapView,
+                clearValue: clear,
+                loadOp: "clear",
+                storeOp: "store",
+            };
+
+        const pass = encoder.beginRenderPass({
+            label: "FluexGL-WebGPURenderer-RenderPass-" + this.id,
+            colorAttachments: [colorAttachment],
+            depthStencilAttachment: {
+                view: this.depthTextureView,
+                depthClearValue: 1.0,
+                depthLoadOp: "clear",
+                depthStoreOp: "store",
+            },
+        });
+
+        return { encoder, pass, colorView: swapView };
+    }
+
+
+    public EndFrame(frameInfo: WebGPURendererFrameInfo): void {
+
+        frameInfo.pass.end();
+        this.gpuDevice.queue.submit([frameInfo.encoder.finish()]);
+    }
+
+    public Dispose(): void {
+        this.depthTexture && this.depthTexture.destroy();
+        this.msaaTexture && this.msaaTexture.destroy();
+    }
+
+    public Render(scene: WebGPURendererScene, camera: Camera) {
+
+        if (!scene.hasPrepared) return Debug.Error("Could not render because the renderable objects in the scene has not been prepared.", [
+            "Make sure to call 'await <WebGPURendererScene>.Prepare()' before calling this method."
+        ], ErrorCodes.WGPUR_SCENE_NOT_PREPARED);
+
+        if (!this.gpuDevice.queue) return;
+
+        camera.WriteUniformsToQueue(this.gpuDevice.queue);
+
+        const frame: WebGPURendererFrameInfo = this.BeginFrame();
+
+        frame.pass.setBindGroup(0, camera.bindGroup);
+
+        for (let i = 0; i < scene.rendererables.length; i++) {
+
+            const renderable: Renderable = scene.rendererables[i];
+
+            const cameraViewProjectionCast = camera.viewProjection as unknown as Float32Array;
+
+            renderable.Render(frame.pass, cameraViewProjectionCast);
+        }
+
+        this.EndFrame(frame);
+    }
+
+    // Private methods.
 
     private applySizeChanges() {
 
@@ -181,14 +271,14 @@ export class WebGPURenderer {
         this.depthTexture && this.depthTexture.destroy();
         this.msaaTexture && this.msaaTexture.destroy();
 
-        if(!this.gpuDevice) return;
+        if (!this.gpuDevice) return;
 
         this.depthTexture = this.gpuDevice.createTexture({
             size: {
                 width: this.width,
                 height: this.height,
             },
-            format: this.options.depthFormat ?? "depth24plus",
+            format: "depth24plus",
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
             label: "FluexGL-WebGPURenderer-DepthTexture-" + this.id
         });
@@ -209,5 +299,29 @@ export class WebGPURenderer {
             sampleCount: msaaSampleCount,
             label: "FluexGL-WebGPURenderer-MSAATexture-" + this.id
         });
+    }
+
+    private configureContext(): void {
+
+        if (!this.gpuDevice) return Debug.Error("WebGPURenderer: Cannot configure context because GPU device is undefined.", [
+            "At configuring context."
+        ], ErrorCodes.WGPUR_DEVICE_UNDEFINED);
+
+        const configuration: GPUCanvasConfiguration = {
+            device: this.gpuDevice,
+            format: this.format,
+            alphaMode: this.options.alphaMode ?? "premultiplied",
+            colorSpace: this.options.colorSpace ?? "srgb",
+        }
+
+        if (!this.context) return Debug.Error("WebGPURenderer: Cannot configure context because GPU canvas context is undefined.", [
+            "At configuring context."
+        ], ErrorCodes.WGPUR_CONTEXT_UNDEFINED);
+
+        this.context.configure(configuration);
+
+        return Debug.Log("WebGPURenderer: Successfully configured GPU canvas context.", [
+            "Configuration: " + JSON.stringify(configuration)
+        ]);
     }
 }

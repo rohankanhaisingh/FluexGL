@@ -1,0 +1,1 @@
+export { SimpleTriangle } from "./classes/2d/SimpleTriangle";

@@ -63,11 +63,21 @@ export {
 } from "./utilities/exports";
 
 export {
-    WebGPURenderer
+    SimpleTriangle
+} from "./geometries/exports";
+
+export {
+    WebGPURenderer,
+    Renderable
 } from "./renderer/exports";
 
 export {
-    Scene, Thread
+    Camera,
+    PerspectiveCamera
+} from "./camera/exports"; 
+
+export {
+    WebGPURendererScene, Thread
 } from "./others/exports";
 
 // Exporting typings.

@@ -1,3 +1,1 @@
-/**
- * Box geometry
- */
+export class BoxGeometry {}

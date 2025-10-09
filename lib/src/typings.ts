@@ -87,3 +87,9 @@ export interface WebGPURendererOptions {
     clearColor: GPUColor;
     devicePixelRatio: number;
 }
+
+export interface WebGPURendererFrameInfo {
+    encoder: GPUCommandEncoder;
+    pass: GPURenderPassEncoder;
+    colorView: GPUTextureView;
+}
