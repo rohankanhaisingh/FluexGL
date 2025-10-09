@@ -181,6 +181,8 @@ export class WebGPURenderer {
         this.depthTexture && this.depthTexture.destroy();
         this.msaaTexture && this.msaaTexture.destroy();
 
+        if(!this.gpuDevice) return;
+
         this.depthTexture = this.gpuDevice.createTexture({
             size: {
                 width: this.width,
