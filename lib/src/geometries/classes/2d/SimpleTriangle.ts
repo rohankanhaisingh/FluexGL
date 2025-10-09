@@ -13,7 +13,6 @@ export class SimpleTriangle extends Renderable {
         this.shader = shader;
 
         const msaa = Math.max(1, sampleCount | 0);
-        console.log("[SimpleTriangle] MSAA sampleCount =", msaa);
 
         const module = device.createShaderModule({ code: shader, label: "SimpleTriangle.wgsl" });
 
