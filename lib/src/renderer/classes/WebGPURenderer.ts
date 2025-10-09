@@ -180,29 +180,34 @@ export class WebGPURenderer {
 
     public BeginFrame(): WebGPURendererFrameInfo {
         const clear = this.options.clearColor ?? { r: 0, g: 0, b: 0, a: 1 };
+        const currentTextureView = this.context.getCurrentTexture().createView();
 
-        const swapView = this.context.getCurrentTexture().createView();
-        
         const encoder = this.gpuDevice.createCommandEncoder({
             label: "FluexGL-WebGPURenderer-CommandEncoder-" + this.id
         });
 
-        const sampleCount = this.options.msaaSampleCount ?? 1;
+        const msaa = this.getMsaa();
 
-        const colorAttachment: GPURenderPassColorAttachment = sampleCount > 1
-            ? {
+        let colorAttachment: GPURenderPassColorAttachment;
+
+        if (msaa > 1) {
+
+            colorAttachment = {
                 view: this.msaaTextureView,
-                resolveTarget: swapView,
-                clearValue: clear,
-                loadOp: "clear",
-                storeOp: "store",
-            }
-            : {
-                view: swapView,
+                resolveTarget: currentTextureView,
                 clearValue: clear,
                 loadOp: "clear",
                 storeOp: "store",
             };
+        } else {
+
+            colorAttachment = {
+                view: currentTextureView,
+                clearValue: clear,
+                loadOp: "clear",
+                storeOp: "store",
+            } as GPURenderPassColorAttachment;
+        }
 
         const pass = encoder.beginRenderPass({
             label: "FluexGL-WebGPURenderer-RenderPass-" + this.id,
@@ -215,9 +220,8 @@ export class WebGPURenderer {
             },
         });
 
-        return { encoder, pass, colorView: swapView };
+        return { encoder, pass, colorView: currentTextureView };
     }
-
 
     public EndFrame(frameInfo: WebGPURendererFrameInfo): void {
 
@@ -266,41 +270,67 @@ export class WebGPURenderer {
         this.SetSize(width, height);
     }
 
-    private createOrResizeTargets() {
+    private async createOrResizeTargets() {
 
-        this.depthTexture && this.depthTexture.destroy();
-        this.msaaTexture && this.msaaTexture.destroy();
+        this.depthTexture?.destroy();
+        this.msaaTexture?.destroy();
 
         if (!this.gpuDevice) return;
 
+        const width: number = Math.max(1, this.width | 0),
+            height: number = Math.max(1, this.height | 0);
+
+        const msaa: number = this.getMsaa();
+
+        await this.gpuDevice.pushErrorScope("validation");
+
         this.depthTexture = this.gpuDevice.createTexture({
-            size: {
-                width: this.width,
-                height: this.height,
-            },
+            size: { width, height },
             format: "depth24plus",
+            sampleCount: msaa,
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
-            label: "FluexGL-WebGPURenderer-DepthTexture-" + this.id
+            label: `FluexGL-WebGPURenderer-DepthTexture-${this.id}`,
         });
 
         this.depthTextureView = this.depthTexture.createView();
 
-        const msaaSampleCount: number = this.options.msaaSampleCount ?? 4;
+        let err = await this.gpuDevice.popErrorScope();
 
-        if (msaaSampleCount < 1) return;
+        if (err) return Debug.Error("Depth texture validation error", [
+            err.message
+        ], ErrorCodes.WGPUR_DEPTH_TEXTURE_VALIDATION_ERROR)
 
-        this.msaaTexture = this.gpuDevice.createTexture({
-            size: {
-                width: this.width,
-                height: this.height,
-            },
-            format: this.format,
-            usage: GPUTextureUsage.RENDER_ATTACHMENT,
-            sampleCount: msaaSampleCount,
-            label: "FluexGL-WebGPURenderer-MSAATexture-" + this.id
-        });
+        if (msaa > 1) {
+
+            await this.gpuDevice.pushErrorScope("validation");
+
+            this.msaaTexture = this.gpuDevice.createTexture({
+                size: { width, height },
+                format: this.format,
+                sampleCount: msaa,
+                usage: GPUTextureUsage.RENDER_ATTACHMENT,
+                label: `FluexGL-WebGPURenderer-MSAATexture-${this.id}`,
+            });
+
+            this.msaaTextureView = this.msaaTexture.createView();
+
+            err = await this.gpuDevice.popErrorScope();
+
+            if (err) {
+
+                this.options.msaaSampleCount = 1;
+                this.msaaTexture = undefined as any;
+                this.msaaTextureView = undefined as any;
+
+                Debug.Error("MSAA texture validation error.", [
+                    err.message
+                ], ErrorCodes.WGPUR_MSAA_TEXTURE_VALIDATION_ERROR)
+            }
+        } else {
+            this.msaaTexture = undefined as any;
+            this.msaaTextureView = undefined as any;
+        }
     }
-
     private configureContext(): void {
 
         if (!this.gpuDevice) return Debug.Error("WebGPURenderer: Cannot configure context because GPU device is undefined.", [
@@ -323,5 +353,11 @@ export class WebGPURenderer {
         return Debug.Log("WebGPURenderer: Successfully configured GPU canvas context.", [
             "Configuration: " + JSON.stringify(configuration)
         ]);
+    }
+
+    private getMsaa(): number {
+        const n = this.options.msaaSampleCount ?? 1;
+
+        return (n === 1 || n === 2 || n === 4 || n === 8) ? n : 1;
     }
 }
