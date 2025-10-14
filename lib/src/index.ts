@@ -63,7 +63,8 @@ export {
 } from "./utilities/exports";
 
 export {
-    SimpleTriangle
+    SimpleTriangle,
+    CubeGeometry
 } from "./geometries/exports";
 
 export {

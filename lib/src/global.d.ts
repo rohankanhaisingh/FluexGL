@@ -4,3 +4,8 @@ declare module "*.wgsl"{
     const source: string;
     export default source;
 }
+
+declare module "*.json" {
+    const source: Record<string, any>;
+    export default source;
+}

@@ -179,33 +179,38 @@ export class WebGPURenderer {
     }
 
     public BeginFrame(): WebGPURendererFrameInfo {
+
         const clear = this.options.clearColor ?? { r: 0, g: 0, b: 0, a: 1 };
         const currentTextureView = this.context.getCurrentTexture().createView();
-
         const encoder = this.gpuDevice.createCommandEncoder({
-            label: "FluexGL-WebGPURenderer-CommandEncoder-" + this.id
+            label: "FluexGL-WebGPURenderer-CommandEncoder-" + this.id,
         });
 
-        const msaa = this.getMsaa();
+        const msaa = Math.max(1, this.options.msaaSampleCount ?? 1);
 
         let colorAttachment: GPURenderPassColorAttachment;
 
-        if (msaa > 1) {
+        if (!this.depthTextureView) {
+            this.createOrResizeTargets();
+        }
 
+        if (msaa > 1) {
+            if (!this.msaaTextureView) {
+                this.createOrResizeTargets();
+            }
             colorAttachment = {
                 view: this.msaaTextureView,
                 resolveTarget: currentTextureView,
-                clearValue: clear,
                 loadOp: "clear",
                 storeOp: "store",
+                clearValue: clear,
             };
         } else {
-
             colorAttachment = {
                 view: currentTextureView,
-                clearValue: clear,
                 loadOp: "clear",
                 storeOp: "store",
+                clearValue: clear,
             } as GPURenderPassColorAttachment;
         }
 
@@ -214,14 +219,15 @@ export class WebGPURenderer {
             colorAttachments: [colorAttachment],
             depthStencilAttachment: {
                 view: this.depthTextureView,
-                depthClearValue: 1.0,
                 depthLoadOp: "clear",
                 depthStoreOp: "store",
+                depthClearValue: 1.0,
             },
         });
 
         return { encoder, pass, colorView: currentTextureView };
     }
+
 
     public EndFrame(frameInfo: WebGPURendererFrameInfo): void {
 
@@ -270,19 +276,14 @@ export class WebGPURenderer {
         this.SetSize(width, height);
     }
 
-    private async createOrResizeTargets() {
-
+    private createOrResizeTargets() {
         this.depthTexture?.destroy();
         this.msaaTexture?.destroy();
-
         if (!this.gpuDevice) return;
 
-        const width: number = Math.max(1, this.width | 0),
-            height: number = Math.max(1, this.height | 0);
-
-        const msaa: number = this.getMsaa();
-
-        await this.gpuDevice.pushErrorScope("validation");
+        const width = Math.max(1, this.width | 0);
+        const height = Math.max(1, this.height | 0);
+        const msaa = this.getMsaa();
 
         this.depthTexture = this.gpuDevice.createTexture({
             size: { width, height },
@@ -291,18 +292,9 @@ export class WebGPURenderer {
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
             label: `FluexGL-WebGPURenderer-DepthTexture-${this.id}`,
         });
-
         this.depthTextureView = this.depthTexture.createView();
 
-        let err = await this.gpuDevice.popErrorScope();
-
-        if (err) return Debug.Error("Depth texture validation error", [
-            err.message
-        ], ErrorCodes.WGPUR_DEPTH_TEXTURE_VALIDATION_ERROR)
-
         if (msaa > 1) {
-
-            await this.gpuDevice.pushErrorScope("validation");
 
             this.msaaTexture = this.gpuDevice.createTexture({
                 size: { width, height },
@@ -311,22 +303,9 @@ export class WebGPURenderer {
                 usage: GPUTextureUsage.RENDER_ATTACHMENT,
                 label: `FluexGL-WebGPURenderer-MSAATexture-${this.id}`,
             });
-
             this.msaaTextureView = this.msaaTexture.createView();
-
-            err = await this.gpuDevice.popErrorScope();
-
-            if (err) {
-
-                this.options.msaaSampleCount = 1;
-                this.msaaTexture = undefined as any;
-                this.msaaTextureView = undefined as any;
-
-                Debug.Error("MSAA texture validation error.", [
-                    err.message
-                ], ErrorCodes.WGPUR_MSAA_TEXTURE_VALIDATION_ERROR)
-            }
         } else {
+
             this.msaaTexture = undefined as any;
             this.msaaTextureView = undefined as any;
         }
