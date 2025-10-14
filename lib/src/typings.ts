@@ -20,7 +20,7 @@ export interface FluexGlDescriptor {
 
 export interface Vec2 {
     x: number;
-    y: number;
+    y: number;   
 }
 
 export interface Vec3 {
