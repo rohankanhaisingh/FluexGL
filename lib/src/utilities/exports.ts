@@ -43,6 +43,10 @@ export {
 } from "./constants";
 
 export {
+    EnsureWebGPU
+} from "./helpers";
+
+export {
     Debug
 } from "./debugging/console";
 

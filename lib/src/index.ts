@@ -91,5 +91,8 @@ export {
     ThreadEvents,
     FluexGlDescriptor,
     FluexGLOptions,
-    FluexGlDebuggerOptions
+    FluexGlDebuggerOptions,
+    WebGPUEnsureState,
+    WebGPURendererFrameInfo,
+    WebGPURendererOptions
 } from "./typings";

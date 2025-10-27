@@ -93,3 +93,9 @@ export interface WebGPURendererFrameInfo {
     pass: GPURenderPassEncoder;
     colorView: GPUTextureView;
 }
+
+export interface WebGPUEnsureState {
+    ok: boolean;
+    reason?: string;
+    error?: Error;
+}
