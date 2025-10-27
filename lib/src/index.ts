@@ -59,7 +59,8 @@ export {
     MaxSafeInt,
     DefaultGravity,
     DefaultAirDensity,
-    Debug, Vector2, Vector3, Vector4, Color
+    Debug, Vector2, Vector3, Vector4, Color,
+    EnsureWebGPU,
 } from "./utilities/exports";
 
 export {
