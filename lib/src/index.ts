@@ -8,3 +8,12 @@
  * For more info, see https://www.fluex.org/solutions/fluex-gl
  */
 
+export { Renderer } from "./core/classes/Renderer";
+export { Thread } from "./core/classes/Thread";
+
+export type {
+    RendererOptions,
+    ThreadEventMap,
+    ThreadEvents,
+    ThreadOnLoopEvent
+} from "./typings";
