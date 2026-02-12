@@ -23,6 +23,10 @@ export class Renderer {
     protected depthTextureWidth: number = 0;
     protected depthTextureHeight: number = 0;
 
+    protected mvpBuffer: GPUBuffer | null = null;
+    protected mvpBindGroup: GPUBindGroup | null = null;
+    protected mvpBindGroupLayout: GPUBindGroupLayout | null = null;
+
     protected basicPipeline: GPURenderPipeline | null = null
     protected triangleVertexBuffer: GPUBuffer | null = null;
     protected triangleVertexCount: number = 3;
