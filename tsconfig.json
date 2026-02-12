@@ -20,7 +20,6 @@
     "lib/src/**/*.ts",
     "lib/src/**/*.tsx",
     "lib/src/**/*.json",
-    "lib/src/**/*.wgsl"
   ],
   "exclude": [
     "lib/test",

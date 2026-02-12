@@ -1,9 +1,33 @@
 {
+  "name": "fluexgl",
+  "version": "0.1.0",
+  "description": "FluexGL, an open-source graphical library made using WebGPU and TypeScript.",
+  "homepage": "https://github.com/rohankanhaisingh/FluexGL#readme",
+  "bugs": {
+    "url": "https://github.com/rohankanhaisingh/FluexGL/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rohankanhaisingh/FluexGL.git"
+  },
+  "license": "MIT",
+  "author": "Rohan Kanhaisingh, Fluex",
+  "type": "commonjs",
+  "main": "./lib/dist/index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --build",
+    "watch": "tsc --watch"
+  },
   "dependencies": {
     "@types/uuid": "^10.0.0",
     "gl-matrix": "^3.4.4",
     "uuid": "^13.0.0",
     "wgsl_reflect": "^1.2.3",
     "@webgpu/types": "^0.1.65"
-  }
+  },
+  "devDependencies": {}
 }
