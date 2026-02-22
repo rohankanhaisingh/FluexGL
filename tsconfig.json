@@ -23,6 +23,7 @@
   ],
   "exclude": [
     "lib/test",
-    "node_modules"
+    "node_modules",
+    "scripts"
   ]
 }

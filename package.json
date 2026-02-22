@@ -20,14 +20,20 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --build",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "export-shaders": "tsx ./scripts/export-shaders.js"
   },
   "dependencies": {
     "@types/uuid": "^10.0.0",
+    "@webgpu/types": "^0.1.65",
     "gl-matrix": "^3.4.4",
+    "string.prototype.replaceall": "^1.0.11",
     "uuid": "^13.0.0",
-    "wgsl_reflect": "^1.2.3",
-    "@webgpu/types": "^0.1.65"
+    "wgsl_reflect": "^1.2.3"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/node": "^24.10.13",
+    "glob": "^13.0.6",
+    "ts-node": "^10.9.2"
+  }
 }
