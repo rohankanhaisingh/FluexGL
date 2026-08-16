@@ -28,7 +28,7 @@
     "@webgpu/types": "^0.1.65",
     "gl-matrix": "^3.4.4",
     "string.prototype.replaceall": "^1.0.11",
-    "uuid": "^13.0.0",
+    "uuid": "^13.0.2",
     "wgsl_reflect": "^1.2.3"
   },
   "devDependencies": {

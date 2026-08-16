@@ -8,12 +8,9 @@
  * For more info, see https://www.fluex.org/solutions/fluex-gl
  */
 
-export { Renderer } from "./core/classes/Renderer";
-export { Thread } from "./core/classes/Thread";
+export { WebGPURenderer2D } from "./core/classes/renderer/WebGPURenderer2D";
+export { Canvas } from "./core/classes/renderer/Canvas";
 
-export type {
-    RendererOptions,
-    ThreadEventMap,
-    ThreadEvents,
-    ThreadOnLoopEvent
+export { 
+    type Vector2 
 } from "./typings";
