@@ -1,3 +1,4 @@
+import { CanvasMouseObject } from "@fluex-gl/testtypings";
 import { v4 } from "uuid";
 
 export interface CanvasOptions {
@@ -17,6 +18,25 @@ export class Canvas {
     public htmlCanvasElement: HTMLCanvasElement | null = null;
     public anchoredElement: HTMLElement | null = null;
 
+    public mouse: CanvasMouseObject = {
+        isInWindow: false,
+        buttons: {
+            left: {
+                isActive: false
+            },
+            middle: {
+                isActive: false
+            },
+            right: {
+                isActive: true
+            }
+        },
+        position: {
+            x: 0,
+            y: 0,
+        }
+    }
+
     constructor(options: CanvasOptions = {}) {
 
         this.width = options.width ?? this.width;
@@ -30,13 +50,39 @@ export class Canvas {
 
         this.htmlCanvasElement.setAttribute("fluexgl-id", this.id);
 
+        this.htmlCanvasElement.addEventListener("mousedown", (event: MouseEvent) => this.htmlCanvasElementOnMouseDown(event));
+        this.htmlCanvasElement.addEventListener("mouseup", (event: MouseEvent) => this.htmlCanvasElementOnMouseUp(event));
+        this.htmlCanvasElement.addEventListener("mouseenter", (event: MouseEvent) => this.htmlCanvasElementOnMouseEnter(event));
+        this.htmlCanvasElement.addEventListener("mouseleave", (event: MouseEvent) => this.htmlCanvasElementOnMouseLeave(event));
+        
         window.addEventListener("resize", () => { this.windowOnResize() });
     }
 
     private windowOnResize() {
         this.anchoredElement && this.resizeCanvasToAnchoredElement();
     }
-    
+
+    private htmlCanvasElementOnMouseDown(event: MouseEvent) {
+        switch(event.button) {
+            case 0: this.mouse.buttons.left.isActive = true; break;
+            case 1: this.mouse.buttons.middle.isActive = true; break;
+            case 2: this.mouse.buttons.right.isActive = true; break;
+        }
+    }
+    private htmlCanvasElementOnMouseUp(event: MouseEvent) {
+        switch(event.button) {
+            case 0: this.mouse.buttons.left.isActive = false; break;
+            case 1: this.mouse.buttons.middle.isActive = false; break;
+            case 2: this.mouse.buttons.right.isActive = false; break;
+        }
+    }
+    private htmlCanvasElementOnMouseEnter(event: MouseEvent) {
+        this.mouse.isInWindow = true;
+    }
+    private htmlCanvasElementOnMouseLeave(event: MouseEvent) {
+        this.mouse.isInWindow = false;
+    }
+
     private resizeCanvasToAnchoredElement() {
 
         if(!this.anchoredElement) 

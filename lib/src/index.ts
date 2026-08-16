@@ -12,5 +12,8 @@ export { WebGPURenderer2D } from "./core/classes/renderer/WebGPURenderer2D";
 export { Canvas } from "./core/classes/renderer/Canvas";
 
 export { 
-    type Vector2 
+    type Vector2,
+    type MouseButton,
+    type MouseButtonMap,
+    type CanvasMouseObject
 } from "./typings";
