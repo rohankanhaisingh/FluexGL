@@ -1,3 +1,5 @@
+import { Vec2 } from "./core/classes/math/Vector2";
+
 /**
  * Basic two-point vector.
  */
@@ -16,8 +18,8 @@ export interface MouseButtonMap {
     right: MouseButton;
 }
 
-export interface CanvasMouseObject {
-    position: Vector2;
+export interface Mouse {
+    position: Vec2;
     buttons: MouseButtonMap;
     isInWindow: boolean;
 }

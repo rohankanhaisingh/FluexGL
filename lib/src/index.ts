@@ -9,11 +9,13 @@
  */
 
 export { WebGPURenderer2D } from "./core/classes/renderer/WebGPURenderer2D";
-export { Canvas } from "./core/classes/renderer/Canvas";
+export { Canvas, type CanvasOptions, type CanvasEventMap } from "./core/classes/renderer/Canvas";
+
+export { Vec2 } from "./core/classes/math/Vector2";
 
 export { 
     type Vector2,
     type MouseButton,
     type MouseButtonMap,
-    type CanvasMouseObject
+    type Mouse
 } from "./typings";
