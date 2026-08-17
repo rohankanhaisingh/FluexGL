@@ -21,7 +21,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --build",
     "watch": "tsc --watch",
-    "export-shaders": "tsx ./scripts/export-shaders.js"
+    "export-shaders": "ts-node --project scripts/tsconfig.json scripts/export-shaders.ts",
+    "watch:shaders": "ts-node --project scripts/tsconfig.json scripts/export-shaders.ts --watch"
   },
   "dependencies": {
     "@types/uuid": "^10.0.0",

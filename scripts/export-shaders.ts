@@ -1,24 +1,25 @@
 import fs from "node:fs";
 import path from "node:path";
 
-// @ts-ignore
-import replaceAll from "string.prototype.replaceall";
-
 import { glob } from "glob";
 
-(async function () {
+const libraryDirectory = path.join(__dirname, "../lib"),
+    sourceDirectory = path.join(libraryDirectory, "src");
 
-    const libraryDirectory = path.join(__dirname, "../lib"),
-        sourceDirectory = path.join(libraryDirectory, "src"),
-        shadersDirectory = path.join(sourceDirectory, "shaders");
+function escapeTemplateLiteral(value: string): string {
+    return value
+        .replace(/\\/g, "\\\\")
+        .replace(/`/g, "\\`")
+        .replace(/\${/g, "\\${");
+}
 
-    const startTimestamp: number = Date.now();
+async function exportShaders(): Promise<number> {
 
-    if (!fs.existsSync(shadersDirectory))
-        throw new Error("Shaders directory does not exist");
+    if (!fs.existsSync(sourceDirectory))
+        throw new Error("Source directory does not exist");
 
     let shaderFiles = await glob("**/*.wgsl", {
-        cwd: shadersDirectory,
+        cwd: sourceDirectory,
         nodir: true
     });
 
@@ -26,40 +27,66 @@ import { glob } from "glob";
         return a.localeCompare(b);
     });
 
-    const shaderEntries = shaderFiles.map(function (shaderFile: string) {
+    for (const shaderFile of shaderFiles) {
 
-        const normalizedShaderFile: string = replaceAll(shaderFile, "\\", "/"),
-            shaderPath: string = path.join(shadersDirectory, shaderFile),
-            fileContent: string = fs.readFileSync(shaderPath, "utf-8");
+        const shaderPath: string = path.join(sourceDirectory, shaderFile),
+            fileContent: string = fs.readFileSync(shaderPath, "utf-8"),
+            escapedContent: string = escapeTemplateLiteral(fileContent);
 
-        return {
-            key: normalizedShaderFile,
-            value: fileContent
-        };
+        const generatedFile = [
+            `// Auto-generated from ${path.basename(shaderFile)}. Do not edit manually.`,
+            `// Regenerate with "npm run export-shaders".`,
+            "",
+            `const shaderSource: string = \`${escapedContent}\`;`,
+            "",
+            "export default shaderSource;",
+            ""
+        ].join("\n");
+
+        const outputFile = `${shaderPath}.ts`;
+        fs.writeFileSync(outputFile, generatedFile, "utf-8");
+    }
+
+    return shaderFiles.length;
+}
+
+function watchShaders(): void {
+
+    console.log(`Watching ${sourceDirectory} for *.wgsl changes...`);
+
+    let debounceTimer: NodeJS.Timeout | null = null;
+
+    fs.watch(sourceDirectory, { recursive: true }, function (_event, filename) {
+
+        if (!filename || !filename.toString().endsWith(".wgsl"))
+            return;
+
+        if (debounceTimer)
+            clearTimeout(debounceTimer);
+
+        debounceTimer = setTimeout(function () {
+            const startTimestamp: number = Date.now();
+
+            exportShaders()
+                .then(function (count) {
+                    const elapsed: number = Date.now() - startTimestamp;
+                    console.log(`[${new Date().toLocaleTimeString()}] Re-exported ${count} shader(s) (${elapsed}ms).`);
+                })
+                .catch(function (error) {
+                    console.error("Failed to re-export shaders:", error);
+                });
+        }, 150);
     });
+}
 
-    const objectBody = shaderEntries
-        .map(function ({ key, value }) {
-            const escapedValue: string = value
-                .replace(/\\/g, "\\\\")
-                .replace(/`/g, "\\`")
-                .replace(/\${/g, "\\${");
+(async function () {
 
-            return `  ${JSON.stringify(key)}: \`${escapedValue}\``;
-        })
-        .join(",\n");
+    const startTimestamp: number = Date.now();
+    const count = await exportShaders();
+    const elapsed: number = Date.now() - startTimestamp;
 
-    const generatedFile = [
-        `// Exported from ${shaderFiles.length} shader files(s).`,
-        "",
-        "export const shaderSources: Record<string, string> = {",
-        objectBody,
-        "};",
-        "",
-        "export default shaderSources;",
-        ""
-    ].join("\n");
+    console.log(`Exported ${count} shader(s) (${elapsed}ms).`);
 
-    const exportsFile = path.join(shadersDirectory, "exports.ts");
-    fs.writeFileSync(exportsFile, generatedFile, "utf-8");
+    if (process.argv.includes("--watch"))
+        watchShaders();
 })();
