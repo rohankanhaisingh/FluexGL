@@ -26,6 +26,7 @@
   "dependencies": {
     "@types/uuid": "^10.0.0",
     "@webgpu/types": "^0.1.65",
+    "ansicolor": "^2.0.3",
     "gl-matrix": "^3.4.4",
     "string.prototype.replaceall": "^1.0.11",
     "uuid": "^13.0.2",

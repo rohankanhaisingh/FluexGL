@@ -1,3 +1,4 @@
+
 /**
  * FluexGL brought to you by Rohan Kanhaisingh 
  * as part of the Fluex company.
@@ -8,9 +9,9 @@
  * For more info, see https://www.fluex.org/solutions/fluex-gl
  */
 
-export { WebGPURenderer2D } from "./core/classes/renderer/WebGPURenderer2D";
+export { WebGPURenderer2D, type WebGPURenderer2DOptions, type WebGPURendererFrame } from "./core/classes/renderer/WebGPURenderer2D";
 export { Canvas, type CanvasOptions, type CanvasEventMap } from "./core/classes/renderer/Canvas";
-
+export { Camera2D } from "./core/classes/cameras/Camera2D";
 export { Vec2 } from "./core/classes/math/Vector2";
 
 export { 
