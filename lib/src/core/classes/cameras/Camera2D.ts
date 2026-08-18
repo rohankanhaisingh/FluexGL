@@ -9,13 +9,13 @@ export interface Camera2DOptions {
 
 export class Camera2D {
 
-    public id: string = v4();
+    public readonly id: string = v4();
 
     public position: Vec2 = Vec2.zero();
     public zoom: number = 1;
 
     public viewProjectionMatrix: mat4 = mat4.create();
-    public dirty: boolean = false;
+    public dirty: boolean = true;
 
     constructor({ zoom }: Camera2DOptions = {}) {
         this.zoom = zoom ?? this.zoom;
@@ -54,7 +54,7 @@ export class Camera2D {
             hh: number = (height / 2) / this.zoom;
 
         const left: number = this.position.x - hw,
-            right: number = this.position.y + hw,
+            right: number = this.position.x + hw,
             top: number = this.position.y + hh,
             bottom: number = this.position.y - hh;
 

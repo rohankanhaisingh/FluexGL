@@ -1,7 +1,7 @@
 // Auto-generated from BasicSprite.wgsl. Do not edit manually.
 // Regenerate with "npm run export-shaders".
 
-const shaderSource: string = `struct VertexInput {
+export const BasicSprite: string = `struct VertexInput {
     @location(0) position: vec2<f32>
 };
 
@@ -26,5 +26,3 @@ fn fragmentShaderMain(input: VertexOutput) -> @location(0) vec4<f32> {
     return vec4<f32>(1.0, 0.0, 0.0, 1.0);
 }
 `;
-
-export default shaderSource;

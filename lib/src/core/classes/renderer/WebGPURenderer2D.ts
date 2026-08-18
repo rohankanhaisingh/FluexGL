@@ -16,7 +16,7 @@ export interface WebGPURendererFrame {
 
 export class WebGPURenderer2D {
 
-    public id: string = v4();
+    public readonly id: string = v4();
 
     public canvas: Canvas | null = null;
     public clearColor: GPUColorDict | null = null;
@@ -115,8 +115,8 @@ export class WebGPURenderer2D {
         this.assertInitialized();
 
         const matrix = camera.update(this.canvas!.width, this.canvas!.height);
-        const data = Float32Array.from(matrix);
 
+        const data = Float32Array.from(matrix);
         this.device!.queue.writeBuffer(
             this.cameraBuffer!,
             0,

@@ -23,10 +23,11 @@ export type CanvasEvents = {
 
 export class Canvas {
 
+    public readonly id: string = v4();
+
     public width: number = 600;
     public height: number = 400;
     public fullScreen: boolean = false;
-    public id: string = v4();
 
     public htmlCanvasElement: HTMLCanvasElement | null = null;
     public anchoredElement: HTMLElement | null = null;
